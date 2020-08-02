@@ -13,7 +13,7 @@
 #import <AppKit/AppKit.h>
 #import "YMThemeManager.h"
 #import "ANYMethodLog.h"
-#import "YMFuzzyMannger.h"
+#import "YMFuzzyManager.h"
 
 @interface NSCellAuxiliary : NSObject
 
@@ -71,7 +71,6 @@
         hookMethod(objc_getClass("MMContactsDetailViewController"), NSSelectorFromString(@"viewWillAppear"), [self class], @selector(hook_contactsDetailViewWillAppear));
          hookMethod(objc_getClass("MMFavoriteDetailViewContoller"), NSSelectorFromString(@"viewWillAppear"), [self class], @selector(hook_favoriteDetailViewWillAppear));
     }
-   
 }
 
 #pragma mark - 收藏
@@ -236,7 +235,7 @@
     NSTextView *view = (NSTextView *)self;
     
     // Search chat history window
-    if (view.superview != nil && ([view.superview isKindOfClass:NSClassFromString(@"MMChatLogEventView")] || [view.superview isKindOfClass:NSClassFromString(@"MMView")])) {
+    if (view.superview != nil && ([view.superview isKindOfClass:NSClassFromString(@"MMChatLogEventView")] || [view.superview isKindOfClass:NSClassFromString(@"MMView")]) && ![view.superview isKindOfClass:objc_getClass("MMReaderWrapView")]) {
         NSRange area = NSMakeRange(0, [view.textStorage length]);
         [view.textStorage removeAttribute:NSForegroundColorAttributeName range:area];
         [view.textStorage addAttributes:@{
@@ -291,7 +290,7 @@
     @try {
         NSTextFieldCell *cell = [infoView.chatNameLabel valueForKey:@"cell"];
         NSAttributedString *originalText = [cell valueForKey:@"contents"];
-        NSMutableAttributedString *darkModelChatName = [[NSMutableAttributedString alloc] initWithString:originalText.string attributes:@{NSForegroundColorAttributeName : [NSColor whiteColor], NSFontAttributeName : [NSFont systemFontOfSize:16]}];
+        NSMutableAttributedString *darkModelChatName = [[NSMutableAttributedString alloc] initWithString:originalText.string attributes:@{NSForegroundColorAttributeName : [NSColor whiteColor], NSFontAttributeName : [NSFont systemFontOfSize:15]}];
         [infoView.chatNameLabel setAttributedStringValue:darkModelChatName];
     } @catch (NSException *exception) {
         
@@ -549,7 +548,7 @@
                         button.alternateImage = tempImage;
                         button.alphaValue = 1.0;
                     });
-                } else {
+                } else if (@available(macOS 10.14, *)) {
                     NSButton *button = (NSButton *)sub;
                     NSImage *tempImage = button.image;
                     button.image = button.alternateImage;
@@ -787,7 +786,7 @@
     
     NSViewController *viewController = (NSViewController *)self;
     [[YMThemeManager shareInstance] changeTheme:viewController.view];
-    [YMFuzzyMannger fuzzyViewController:viewController];
+    [YMFuzzyManager fuzzyViewController:viewController];
 }
 
 - (void)hook_windowDidLoad
@@ -807,7 +806,7 @@
         }
     }
     
-    [YMFuzzyMannger fuzzyWindowViewController:(NSWindowController *)self];
+    [YMFuzzyManager fuzzyWindowViewController:(NSWindowController *)self];
 }
 
 @end
